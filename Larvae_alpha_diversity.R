@@ -8,8 +8,8 @@ library(lme4)
 setwd("~/Documents/Bioinformatics_scripts/R_scripts/Valentine_et_al/paper1/")
 
 map=read.table("inputs/Larvae_metadata.txt", header = T, sep = "\t", row.names = 1)
-asv=read.table("outputs/Larvae_ASVs_noContanoOut.txt", header = T, sep = "\t", row.names = 1)[,1:23]
-tax=read.table("outputs/Larvae_ASVs_noContanoOut.txt", header = T, sep = "\t", row.names = 1)[,24:29]
+asv=read.table("outputs/Larvae_ASVs_noContanoOut.txt", header = T, sep = "\t", row.names = 1)[,1:17]
+tax=read.table("outputs/Larvae_ASVs_noContanoOut.txt", header = T, sep = "\t", row.names = 1)[,19:24]
 tax$Family=gsub("Alcanivoracaceae1", "Alcanivoracaceae", tax$Family)
 
 ###rarefying
@@ -32,6 +32,11 @@ alpha$Stage=map$stage[match(rownames(alpha), rownames(map))]
 sha_model=lm(Shannon~ Stage, data = alpha)
 anova(sha_model) 
 summary(sha_model) 
+
+plot(sha_model)
+hist(sha_model$residuals, main = "Residual Histogram")
+
+shapiro.test(residuals(sha_model))
 
 #pairwise 
 sha_pairs = emmeans(sha_model, pairwise ~ Stage, weights = "proportional", adjust="none")
@@ -66,35 +71,32 @@ qqnorm(res_cha)
 qqline(res_cha) 
 plot(density(res_cha))
 
-
 # boxplots
-alpha$Stage=factor(alpha$Stage, levels = c("Egg","Sperm","Larvae15d" ,"Larvae17d", "Larvae28d","Seawater"))
+alpha$Stage=factor(alpha$Stage, levels = c("Egg","Sperm","Larvae15d" ,"Larvae28d","Seawater"))
 
 shan=ggplot(alpha, aes(x=Stage, y=Shannon, fill=Stage)) + 
   stat_boxplot(geom = "errorbar")  + 
   geom_boxplot(alpha = 1) +  
-  scale_fill_manual(values=c("#FF928B","#B9C0DA", "#645617", "#B79D2A","#E1CE7A", "#2589BD"))  + 
+  scale_fill_manual(values=c("#FF928B","#B9C0DA", "#645617", "#E1CE7A", "#2589BD"))  + 
   theme_bw() + theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) + 
   labs( y= "Shannon diversity", x="")  + 
   annotate(geom="text", x=1, y=0.5, label= "A") + 
   annotate(geom="text", x=2, y=0.5, label= "A") + 
   annotate(geom="text", x=3, y=0.5, label= "A") + 
   annotate(geom="text", x=4, y=0.5, label= "B") + 
-  annotate(geom="text", x=5, y=0.5, label= "C") + 
-  annotate(geom="text", x=6, y=0.5, label= "D") 
+  annotate(geom="text", x=5, y=0.5, label= "C") 
 
 cha1=ggplot(alpha, aes(x=Stage, y=S.chao1, fill=Stage)) + 
   stat_boxplot(geom = "errorbar")  + 
   geom_boxplot(alpha = 1) +  
-  scale_fill_manual(values=c("#FF928B","#B9C0DA", "#645617", "#B79D2A","#E1CE7A", "#2589BD"))  + 
+  scale_fill_manual(values=c("#FF928B","#B9C0DA", "#645617", "#E1CE7A", "#2589BD"))  + 
   theme_bw() + theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) + 
   labs( y= "Chao1 estimated richness", x="")  +
   annotate(geom="text", x=1, y=0.5, label= "A") + 
   annotate(geom="text", x=2, y=0.5, label= "B") + 
   annotate(geom="text", x=3, y=0.5, label= "C") + 
   annotate(geom="text", x=4, y=0.5, label= "A") + 
-  annotate(geom="text", x=5, y=0.5, label= "AD") + 
-  annotate(geom="text", x=6, y=0.5, label= "D") 
+  annotate(geom="text", x=5, y=0.5, label= "A") 
 
 pdf("./outputs/Larvae_AlphaDiversiy.pdf", width=5,height=7, pointsize = 12)
 shan/cha1
