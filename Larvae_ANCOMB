@@ -58,5 +58,3 @@ message("Number of total DA genera: ", nrow(res3_sig), "\nNumber of DA genera en
 all=rbind(res1_sig, res2_sig, res3_sig) %>% filter(!Diff_more_abundant == "Others")
 
 write.table(all, "outputs/Larvae_ANCOM_Results3_May2024.txt",  quote = F, sep = "\t")
-
-
